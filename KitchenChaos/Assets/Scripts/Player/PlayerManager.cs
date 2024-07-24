@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,13 @@ using UnityEngine.EventSystems;
 public class PlayerManager : MonoBehaviour,IKitchenObjectParent
 {
     public static PlayerManager Instance { get; private set; }
+
+    public event EventHandler<OnSelectedCounterChangedEventsArgs> OnSelectedCounterChanged;
+
+    public class OnSelectedCounterChangedEventsArgs : EventArgs
+    {
+        public BaseCounter baseCounterSelected;
+    }
 
     [Header("Movement Atts")]
     [SerializeField] private float movementSpeed = 8.0f;
@@ -19,7 +27,7 @@ public class PlayerManager : MonoBehaviour,IKitchenObjectParent
     [SerializeField] private Transform kitchenObjectHoldPoint;
     [SerializeField] private KitchenObject kitchenObject;
 
-    [SerializeField] private GameObject[] visualArray;
+   
 
     private void Awake()
     {
@@ -39,8 +47,8 @@ public class PlayerManager : MonoBehaviour,IKitchenObjectParent
 
     private void GameInput_OnInteractAction(object sender, System.EventArgs e)
     {
-        //print("YA INTERACTUE");
-        if(CanInteract)
+      
+        if(baseCounterSelected != null)
         {
             baseCounterSelected.Interact(this);
         }
@@ -77,19 +85,15 @@ public class PlayerManager : MonoBehaviour,IKitchenObjectParent
         {
             if (raycastHit.transform.TryGetComponent(out BaseCounter baseCounter))
             {
-                //print("TOQUE UN CLUNTERRRR");
-                CanInteract = true;
-
-                Show();
-                this.baseCounterSelected = baseCounter;
+               
+                SetSelectedCounter(baseCounter);
             }
           
         }
         else
         {
-            CanInteract = false;
 
-           Hide(); 
+            SetSelectedCounter(null);
         }
 
        
@@ -118,7 +122,7 @@ public class PlayerManager : MonoBehaviour,IKitchenObjectParent
 
                 transform.forward += Vector3.Slerp(transform.forward, movementDirection, rotationSpeed * Time.deltaTime);
 
-                //print("<color=green>SE PUEDE MOVER</color>");
+               
             }
 
 
@@ -137,23 +141,6 @@ public class PlayerManager : MonoBehaviour,IKitchenObjectParent
         return movementDirection;
     }
 
-
-    public void Show()
-    {
-        foreach(GameObject visual in visualArray)
-        {
-            visual.SetActive(true);
-        }
-    }
-
-
-    public void Hide()
-    {
-        foreach (GameObject visual in visualArray)
-        {
-            visual.SetActive(false);
-        }
-    }
 
 
     //Kitchen Object Parent Interface
@@ -181,5 +168,16 @@ public class PlayerManager : MonoBehaviour,IKitchenObjectParent
     public bool HasKitchenObject()
     {
         return kitchenObject != null;
+    }
+
+
+    public void SetSelectedCounter(BaseCounter baseCounter)
+    {
+        this.baseCounterSelected = baseCounter;
+
+        OnSelectedCounterChanged?.Invoke(this, new OnSelectedCounterChangedEventsArgs{
+            baseCounterSelected = baseCounterSelected
+        });     
+
     }
 }
