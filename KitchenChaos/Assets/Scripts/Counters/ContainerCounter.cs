@@ -12,10 +12,15 @@ public class ContainerCounter : BaseCounter
     {
         if(!player.HasKitchenObject())
         {
-            Transform transformObject = Instantiate(kitchenObjectSO.kitchenObject,player.GetKitchenObjectFollowTransform());
-            KitchenObject kitchenObject = transformObject.GetComponent<KitchenObject>();
 
-            kitchenObject.SetKitchenObjectParemt(player);
+            KitchenObject.SpawnKitchenObject(kitchenObjectSO, player);
+
+           // Transform transformObject = Instantiate(kitchenObjectSO.kitchenObject,player.GetKitchenObjectFollowTransform());
+           // KitchenObject kitchenObject = transformObject.GetComponent<KitchenObject>();
+
+           // //transformObject.GetComponent<KitchenObject>();
+
+           //kitchenObject.SetKitchenObjectParemt(player);
 
             OnPlayerGrabbedObject?.Invoke(this, EventArgs.Empty);
         }
