@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IKitchenObjectParent
 {
     public static Player Instance { get; private set; }
 
@@ -18,6 +18,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float rotationSpeed = 7.0f;
     [SerializeField] private float playerRadius = 0.7f;
     [SerializeField] private float playerHeight = 2.0f;
+    [SerializeField] private Transform kitchenObjectFollowTransform;
 
     [Header("Game Input Atts")]
     [SerializeField] private GameInput gameInput;
@@ -27,8 +28,9 @@ public class Player : MonoBehaviour
 
 
     private Vector3 lastInteractDirection;
-    [SerializeField] private BaseCounter selectedCounter;
+    private BaseCounter selectedCounter;
 
+    private KitchenObject kitchenObject;
 
     private void Awake()
     {
@@ -44,13 +46,24 @@ public class Player : MonoBehaviour
     private void Start()
     {
         gameInput.OnInteractAction += GameInput_OnInteractAction;
+        gameInput.OnInteractAlternateAction += GameInput_OnInteractAlternateAction;
     }
+
+    
 
     private void GameInput_OnInteractAction(object sender, System.EventArgs e)
     {
         if(selectedCounter != null)
         {
-            Debug.Log("YA INTERACTUA");
+            selectedCounter.Interact(this);
+        }
+    }
+
+    private void GameInput_OnInteractAlternateAction(object sender, EventArgs e)
+    {
+        if(selectedCounter != null)
+        {
+            selectedCounter.InteractAlternate(this);
         }
     }
 
@@ -122,7 +135,7 @@ public class Player : MonoBehaviour
         {
             //Attempt only X movement
             Vector3 moveDirectionX = new Vector3(movementDirection.x, 0.0f, 0.0f).normalized;
-            canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirectionX, moveDistance);
+            canMove = movementDirection.x != 0.0f && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirectionX, moveDistance);
 
             if (canMove)
             {
@@ -135,7 +148,7 @@ public class Player : MonoBehaviour
                 //Attemp only on Z movement
 
                 Vector3 moveDirectionZ = new Vector3(0.0f, 0.0f, movementDirection.z).normalized;
-                canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirectionZ, moveDistance);
+                canMove = movementDirection.z != 0.0f && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirectionZ, moveDistance);
 
 
                 if (canMove)
@@ -169,5 +182,30 @@ public class Player : MonoBehaviour
         {
             selectedCounter = selectedCounter
         });
+    }
+
+    public Transform GetKitchenObjectFollowTransform()
+    {
+        return kitchenObjectFollowTransform;
+    }
+
+    public void SetKitchenObject(KitchenObject kitchenObject)
+    {
+        this.kitchenObject = kitchenObject;
+    }
+
+    public KitchenObject GetKitchenObject()
+    {
+        return kitchenObject;
+    }
+
+    public void ClearKithenObject()
+    {
+        kitchenObject = null;
+    }
+
+    public bool HasKitchenObject()
+    {
+        return kitchenObject != null;
     }
 }

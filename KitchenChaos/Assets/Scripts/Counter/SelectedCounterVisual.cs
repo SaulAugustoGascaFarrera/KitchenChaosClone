@@ -6,7 +6,8 @@ public class SelectedCounterVisual : MonoBehaviour
 {
 
     [SerializeField] private BaseCounter baseCounter;
-    [SerializeField] private GameObject visualGameObject;
+    public List<GameObject> visualGameObjectList;
+    //public List<Material> visualMaterialsList;
 
     void Start()
     {
@@ -28,11 +29,20 @@ public class SelectedCounterVisual : MonoBehaviour
 
     private void Show()
     {
-        visualGameObject.SetActive(true);   
+        foreach(GameObject visualObject in visualGameObjectList)
+        {
+            visualObject.SetActive(true);
+        }
+
+
+           
     }
 
     private void Hide()
     {
-        visualGameObject.SetActive(false);
+        foreach (GameObject visualObject in visualGameObjectList)
+        {
+            visualObject.SetActive(false);
+        }
     }
 }
